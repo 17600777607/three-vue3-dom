@@ -45,15 +45,15 @@ export class Plane {
    * 清除实例
    */
   clearListener = () => {
-    this.renderer = null
-    this.dom = {
-      examples: undefined as any,
-      width: 0,
-      height: 0
-    }
-    this.camera = null
-    this.scene = null
-    this.controls = null
+    // this.renderer = null
+    // this.dom = {
+    //   examples: undefined as any,
+    //   width: 0,
+    //   height: 0
+    // }
+    // this.camera = null
+    // this.scene = null
+    // this.controls = null
     window.removeEventListener('resize', this.onWindowResize)
   }
   /**

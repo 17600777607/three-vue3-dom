@@ -19,6 +19,7 @@ export class TextDraw extends Plane {
     const css2DLabelRenderer = new CSS2DRenderer()
     css2DLabelRenderer.render(this.scene, this.camera)
     this.controls = new OrbitControls(this.camera, this.CSSRender.domElement)
+    this.renders()
     console.log('this.scene', this.scene)
   }
   /**
@@ -30,6 +31,8 @@ export class TextDraw extends Plane {
     this.textDom.width = this.dom.examples.clientWidth
     this.textDom.height = this.dom.examples.clientHeight
     this.CSSRender.setSize(this.textDom.width, this.textDom.height)
+    // //设置.pointerEvents=none，以免模型标签HTML元素遮挡鼠标选择场景模型
+    this.CSSRender.domElement.style.pointerEvents = 'none'
     this.CSSRender.domElement.style.position = 'absolute'
     this.CSSRender.domElement.style.top = '0'
     this.CSSContainer = document.getElementById(dom)
@@ -48,9 +51,11 @@ export class TextDraw extends Plane {
     div.style.height = '100px'
     div.style.background = 'rgba(10,18,51,0.8)'
     div.style.color = '#fff'
+    div.style.fontSize = '24px'
     div.textContent = text
     div.className = 'label'
     const label = new CSS2DObject(div)
+    label.position.set(300, 300, 3)
     return label
   }
 }
