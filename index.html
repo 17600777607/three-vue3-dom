@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" href="/favicon.ico" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>VUE3</title>
+</head>
+<body>
+<div id="app"></div>
+<script type="module" src="/src/main.ts"></script>
+</body>
+<script id="vertexShader" type="x-shader/x-vertex">
+    uniform vec3 viewVector;
+	uniform float c;
+	uniform float p;
+	varying vec2 vUv;
+	varying float intensity;
+
+	void main() {
+	 	vec3 v_normal = normalize(normalMatrix * normal);
+		vec3 v_view = normalize(normalMatrix * viewVector);
+		intensity = pow(c - dot(v_normal, v_view), p);
+	 	vUv = uv;
+	  	gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+	}
+
+</script>
+<script id="fragmentShader" type="x-shader/x-vertex">
+	uniform sampler2D diffuse;
+	uniform vec3 glowColor;
+	varying float intensity;
+	varying vec2 vUv;
+
+	void main() {
+		vec3 glow = glowColor * intensity;
+	  	gl_FragColor = vec4(glow, 1.0)+ texture2D(diffuse, vUv);
+	}
+
+</script>
+<!-- vertext shader a.k.a. pixel shader -->
+<script id="vertexShader2" type="x-shader/x-vertex">
+	varying vec2 vUv;
+    attribute float percent;
+    uniform float u_time;
+    uniform float number;
+    uniform float speed;
+    uniform float length;
+    varying float opacity;
+    uniform float size;
+    void main()
+    {
+        vUv = uv;
+        vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );
+        float l = clamp(1.0-length,0.0,1.0);
+        gl_PointSize = clamp(fract(percent*number + l - u_time*number*speed)-l ,0.0,1.) * size * (1./length);
+        opacity = gl_PointSize/size;
+        gl_Position = projectionMatrix * mvPosition;
+    }
+
+</script>
+<!-- fragment shader a.k.a. pixel shader -->
+<script id="fragmentShader2" type="x-shader/x-vertex">
+	#ifdef GL_ES
+    precision mediump float;
+    #endif
+    varying float opacity;
+    uniform vec3 color;
+    void main(){
+        if(opacity <=0.2){
+            discard;
+        }
+        gl_FragColor = vec4(color,1.0);
+    }
+
+</script>
+</html>
