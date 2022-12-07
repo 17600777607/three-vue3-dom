@@ -13,6 +13,7 @@
   onMounted(() => {
     text.value = new TextDraw('plane')
     text.value.init()
+    text.value.initGeometry()
     text.value.drawText('text')
   })
   onUnmounted(() => {

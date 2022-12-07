@@ -19,7 +19,6 @@ export class TextDraw extends Plane {
     const css2DLabelRenderer = new CSS2DRenderer()
     css2DLabelRenderer.render(this.scene, this.camera)
     this.controls = new OrbitControls(this.camera, this.CSSRender.domElement)
-    this.renders()
     console.log('this.scene', this.scene)
   }
   /**

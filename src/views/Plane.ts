@@ -1,12 +1,18 @@
 import {
   AmbientLight,
+  BufferGeometry,
   Color,
   DirectionalLight,
   FileLoader,
+  Float32BufferAttribute,
   Fog,
   HemisphereLight,
   PerspectiveCamera,
+  Points,
+  PointsMaterial,
   Scene,
+  TextureLoader,
+  Vector3,
   WebGLRenderer
 } from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
@@ -66,6 +72,41 @@ export class Plane {
     this.renderer.setPixelRatio(window.devicePixelRatio)
     this.renderer.setSize(this.dom.width, this.dom.height)
     this.dom.examples.appendChild(this.renderer.domElement)
+  }
+  /**
+   * 星空背景
+   */
+  initGeometry = () => {
+    console.log('初始化星空背景')
+
+    const texture = new TextureLoader().load('/earth/textures/gradient.png')
+    const positions: any = []
+    const colors: any = []
+    const geometry = new BufferGeometry()
+    for (let i = 0; i < 10000; i++) {
+      const vertex = new Vector3()
+      vertex.x = Math.random() * 2 - 1
+      vertex.y = Math.random() * 2 - 1
+      vertex.z = Math.random() * 2 - 1
+      positions.push(vertex.x, vertex.y, vertex.z)
+      const color = new Color()
+      color.setHSL(Math.random() * 0.2 + 0.5, 0.55, Math.random() * 0.25 + 0.55)
+      colors.push(color.r, color.g, color.b)
+    }
+    geometry.setAttribute('position', new Float32BufferAttribute(positions, 3))
+    geometry.setAttribute('color', new Float32BufferAttribute(colors, 3))
+    const starsMaterial = new PointsMaterial({
+      map: texture,
+      size: 1,
+      transparent: true,
+      opacity: 1,
+      vertexColors: true, //true：且该几何体的colors属性有值，则该粒子会舍弃第一个属性--color，而应用该几何体的colors属性的颜色
+      sizeAttenuation: true
+    })
+
+    const stars = new Points(geometry, starsMaterial)
+    stars.scale.set(300, 300, 300)
+    this.scene.add(stars)
   }
   /**
    * @description 初始化相机
