@@ -54,6 +54,7 @@ export class Plane {
     // this.camera = null
     // this.scene = null
     // this.controls = null
+
     window.removeEventListener('resize', this.onWindowResize)
   }
   /**
