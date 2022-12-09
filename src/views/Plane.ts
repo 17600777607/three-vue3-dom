@@ -41,7 +41,6 @@ export class Plane {
     this.initScene()
     this.initControls()
     this.initLight()
-    this.initControls()
     this.animate()
 
     window.addEventListener('resize', this.onWindowResize, false)

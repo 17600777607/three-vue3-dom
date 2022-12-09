@@ -26,9 +26,9 @@
     height: 100%;
   }
   #text {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    top: 0;
+    //position: absolute;
+    //width: 100%;
+    //height: 100%;
+    //top: 0;
   }
 </style>

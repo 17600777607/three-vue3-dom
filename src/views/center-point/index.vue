@@ -1,21 +1,24 @@
 <template>
-  <div id="center-point"> </div>
+  <div style="height: 100%; position: relative">
+    <div id="center-point"> </div>
+    <div id="text"> </div>
+  </div>
 </template>
 <script lang="ts" setup>
-  import { onMounted, onUnmounted, ref } from 'vue'
+  import { onMounted, onUnmounted, reactive } from 'vue'
   import { PointDraw } from '~/views/center-point/PointDraw'
 
   console.log('setup----center-point')
+  let state = reactive({
+    point: null as any
+  })
 
-  let point = ref<any>(null)
-
-  onMounted(() => {
-    point.value = new PointDraw('center-point')
-    point.value.init()
-    point.value.drawPoint()
+  onMounted(async () => {
+    state.point = new PointDraw('center-point')
+    await state.point.initPointDraw()
   })
   onUnmounted(() => {
-    point.value.clearListener()
+    state.point.clearListener()
   })
 </script>
 <style scoped lang="less">

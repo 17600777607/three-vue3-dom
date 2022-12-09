@@ -62,16 +62,17 @@ export default defineConfig({
   },
   // 代理
   server: {
-    https: false,
+    https: true,
     host: 'my.ruijie.com.cn',
     cors: true
     // proxy: {
-    //   '/scm': {
-    //     target: 'http://127.0.0.1:8090',
+    //   '/geocoding': {
+    //     target: 'https://api.mapbox.com',
     //     changeOrigin: false,
-    //     rewrite: (path) => path.replace(/^\/scm/, '/scm'),
+    //     rewrite: (path) => path.replace(/^\/geocoding/, '/geocoding'),
     //     headers: {
-    //       'Access-Control-Allow-Origin': '*'
+    //       'Access-Control-Allow-Origin': '*',
+    //       Host: 'api.mapbox.com'
     //     }
     //   }
     // }

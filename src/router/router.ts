@@ -23,16 +23,22 @@ export const layoutYRoute = [
         meta: { title: '边界', icon: 'iconfont icon-ptmdaohang1' }
       },
       {
+        path: '/text',
+        name: 'Text',
+        component: () => import('~/views/text/index.vue'),
+        meta: { title: '文字绘制', icon: 'iconfont icon-ptmdaohang1' }
+      },
+      {
         path: '/center-point',
         name: 'CenterPoint',
         component: () => import('~/views/center-point/index.vue'),
         meta: { title: '中心点绘制', icon: 'iconfont icon-ptmdaohang1' }
       },
       {
-        path: '/text',
-        name: 'Text',
-        component: () => import('~/views/text/index.vue'),
-        meta: { title: '文字绘制', icon: 'iconfont icon-ptmdaohang1' }
+        path: '/earth-center',
+        name: 'EarthPoint',
+        component: () => import('~/views/earth-center/index.vue'),
+        meta: { title: '地球中心点绘制', icon: 'iconfont icon-ptmdaohang1' }
       }
     ]
   }
