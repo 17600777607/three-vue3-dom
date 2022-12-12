@@ -59,12 +59,18 @@ export class EarthCenter {
   public camera: PerspectiveCamera | any
   public scene: Scene | any
   public controls: OrbitControls | any
+  public cameraFov: number
+  public cameraNear: number
+  public cameraFar: number
 
   constructor(dom: string) {
     this.radius = 100
     this.dom.examples = document.getElementById(dom)
     this.dom.width = this.dom.examples.clientWidth
     this.dom.height = this.dom.examples.clientHeight
+    this.cameraFov = 40
+    this.cameraNear = 1
+    this.cameraFar = 1000
   }
   initPlane = async () => {
     console.log('Plane类--初始化方法')
@@ -73,11 +79,18 @@ export class EarthCenter {
     this.initScene()
     this.initControls()
     this.initLight()
+
     this.animate()
     this.createEarth()
     await this.createAreaPoint()
-
+    // console.log(position)
+    // this.controls.target = new Vector3(0, 0, 1)
+    // this.controls.object.rotation(position)
+    // this.scene.rotation.set(position.x / 2, 0, 0, Math.PI)
     window.addEventListener('resize', this.onWindowResize, false)
+    // const position = this.createPosition([116.405285, 39.904989])
+    // this.controls.object.rotation.set(position)
+    this.renders()
   }
 
   // 世界坐标转屏幕坐标
@@ -106,6 +119,7 @@ export class EarthCenter {
       // color: 0x03d98e
     })
     const earthMesh = new Mesh(earthGeo, earthMater)
+
     this.scene.add(earthMesh)
   }
   createAreaPoint = async () => {
@@ -227,8 +241,6 @@ export class EarthCenter {
     const context: any = canvas.getContext('2d')
     /* 字体加粗 */
     context.font = 12 + 'px ' + 'Arial'
-    /* 获取文字的大小数据，高度取决于文字的大小 */
-    const metrics = context.measureText(message)
     /* 背景颜色 */
     context.fillStyle =
       'rgba(' +
@@ -277,6 +289,36 @@ export class EarthCenter {
     this.renderer.setPixelRatio(window.devicePixelRatio)
     this.renderer.setSize(this.dom.width, this.dom.height)
     this.dom.examples.appendChild(this.renderer.domElement)
+    // document.addEventListener('mousewheel', this.handleMousewheel, false)
+  }
+  handleMousewheel = (e: any) => {
+    console.log('111111', e.wheelDelta)
+    // e.preventDefault()
+    //e.stopPropagation();
+    // if (e.wheelDelta) {
+    //   //判断浏览器IE，谷歌滑轮事件
+    //   if (e.wheelDelta > 0) {
+    //     //当滑轮向上滚动时
+    //     this.cameraFov -= this.cameraNear < this.cameraFov ? 1 : 0
+    //   }
+    //   if (e.wheelDelta < 0) {
+    //     //当滑轮向下滚动时
+    //     this.cameraFov += this.cameraFov < this.cameraFov ? 1 : 0
+    //   }
+    // } else if (e.detail) {
+    //   //Firefox滑轮事件
+    //   if (e.detail > 0) {
+    //     //当滑轮向上滚动时
+    //     this.cameraFov -= 1
+    //   }
+    //   if (e.detail < 0) {
+    //     //当滑轮向下滚动时
+    //     this.cameraFov += 1
+    //   }
+    // }
+    this.camera.fov = this.cameraFov
+    this.camera.updateProjectionMatrix()
+    this.renderer.render(this.scene, this.camera)
   }
 
   /**
@@ -284,7 +326,12 @@ export class EarthCenter {
    */
   initCamera = () => {
     console.log('Plane类--初始化相机')
-    this.camera = new PerspectiveCamera(40, this.dom.width / this.dom.height, 1, 1000)
+    this.camera = new PerspectiveCamera(
+      this.cameraFov,
+      this.dom.width / this.dom.height,
+      this.cameraNear,
+      this.cameraFar
+    )
     this.camera.position.set(0, -220, 200)
     this.camera.lookAt(0, 1, 0)
   }
@@ -305,12 +352,27 @@ export class EarthCenter {
     this.controls = new OrbitControls(this.camera, this.renderer.domElement)
     this.controls.enableDamping = true
     this.controls.enableZoom = true
+    //缩放限制
+    this.controls.minDistance = 150
+    this.controls.maxDistance = 300
     this.controls.zoomSpeed = 1.0
+    //是否使用键盘
+    this.controls.enableKeys = false
 
     this.controls.autoRotate = false
     this.controls.rotateSpeed = 1.0
     this.controls.autoRotateSpeed = 2
     this.controls.enablePan = true
+
+    // this.controls.position = position
+    this.controls.addEventListener(
+      'change',
+      () => {
+        console.log('监听到控件发生了变化', this.controls)
+        console.log()
+      },
+      false
+    )
   }
   /**
    * @description 初始化光
