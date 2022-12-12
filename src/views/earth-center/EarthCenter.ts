@@ -79,18 +79,10 @@ export class EarthCenter {
     this.initScene()
     this.initControls()
     this.initLight()
-
     this.animate()
     this.createEarth()
     await this.createAreaPoint()
-    // console.log(position)
-    // this.controls.target = new Vector3(0, 0, 1)
-    // this.controls.object.rotation(position)
-    // this.scene.rotation.set(position.x / 2, 0, 0, Math.PI)
     window.addEventListener('resize', this.onWindowResize, false)
-    // const position = this.createPosition([116.405285, 39.904989])
-    // this.controls.object.rotation.set(position)
-    this.renders()
   }
 
   // 世界坐标转屏幕坐标
