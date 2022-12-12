@@ -22,7 +22,8 @@ import {
   Sprite,
   SpriteMaterial,
   Texture,
-  Vector2
+  Vector2,
+  Group
 } from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
 
@@ -62,6 +63,7 @@ export class EarthCenter {
   public cameraFov: number
   public cameraNear: number
   public cameraFar: number
+  public group: Group | any
 
   constructor(dom: string) {
     this.radius = 100
@@ -84,7 +86,10 @@ export class EarthCenter {
     await this.createAreaPoint()
     window.addEventListener('resize', this.onWindowResize, false)
   }
-
+  initCenter = () => {
+    console.log('旋转屏幕中心点')
+    console.log(this.scene)
+  }
   // 世界坐标转屏幕坐标
   coordinateWorldTurnScreen = (x: number, y: number, z: number) => {
     const world_vector = new Vector3(x, y, z)
@@ -111,7 +116,6 @@ export class EarthCenter {
       // color: 0x03d98e
     })
     const earthMesh = new Mesh(earthGeo, earthMater)
-
     this.scene.add(earthMesh)
   }
   createAreaPoint = async () => {
