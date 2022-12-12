@@ -136,6 +136,9 @@ export class EarthCenter {
     geoJsonData.features.forEach((d) => {
       if (d.properties.center) {
         const position = this.createPosition(d.properties.center)
+        if (d.properties.name === '北京市') {
+          this.camera.position.set(position.x * 3, position.y * 3, position.z * 3) // 设置相机位置到北京市
+        }
         this.createHexagon(position, d.properties.name) // 地标
       }
     })
@@ -330,6 +333,7 @@ export class EarthCenter {
       this.cameraFar
     )
     this.camera.position.set(0, -220, 200)
+    // this.camera.position.set(-102.34414702722688, 192.4549288923726, -206.12320566666222)
     this.camera.lookAt(0, 1, 0)
   }
   /**
@@ -366,7 +370,7 @@ export class EarthCenter {
       'change',
       () => {
         console.log('监听到控件发生了变化', this.controls)
-        console.log()
+        console.info(this.camera.position, '当前位置')
       },
       false
     )
