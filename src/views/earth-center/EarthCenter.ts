@@ -85,11 +85,12 @@ export class EarthCenter {
     this.createEarth()
     await this.createAreaPoint()
     window.addEventListener('resize', this.onWindowResize, false)
+    // this.initCenter()
   }
-  initCenter = () => {
-    console.log('旋转屏幕中心点')
-    console.log(this.scene)
-  }
+  // initCenter = () => {
+  //   console.log('旋转屏幕中心点')
+  //   console.log(this.scene)
+  // }
   // 世界坐标转屏幕坐标
   coordinateWorldTurnScreen = (x: number, y: number, z: number) => {
     const world_vector = new Vector3(x, y, z)
