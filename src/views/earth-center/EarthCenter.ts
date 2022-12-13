@@ -370,7 +370,6 @@ export class EarthCenter {
       'change',
       () => {
         console.log('监听到控件发生了变化', this.controls)
-        console.info(this.camera.position, '当前位置')
       },
       false
     )
