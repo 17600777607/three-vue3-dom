@@ -75,6 +75,7 @@ export class EarthCenter {
   public cameraNear: number
   public cameraFar: number
   public group: Group | any
+  public timerControls: null | any
 
   constructor(dom: string) {
     this.radius = 100
@@ -86,41 +87,6 @@ export class EarthCenter {
     this.cameraFar = 1000
   }
 
-  /**
-   * 过滤坐标
-   */
-  filterCoordinate = async () => {
-    const geoJsonData: Array<WorldGeoJsonType> = (await this.loadMapData(
-      '/china/json/worldCenter.json'
-    )) as Array<WorldGeoJsonType>
-    console.log('世界坐标', geoJsonData)
-    const include: Array<WorldGeoJsonType> = []
-    const noInclude: Array<WorldGeoJsonType> = []
-    geoJsonData.forEach((d) => {
-      const position = this.createPosition(d.center)
-      const tempV = position
-        .applyMatrix4(this.camera.matrixWorldInverse)
-        .applyMatrix4(this.camera.projectionMatrix)
-      if (Math.abs(tempV.x) > 1 || Math.abs(tempV.y) > 1 || Math.abs(tempV.z) > 1) {
-        //视野 外
-        include.push(d)
-      } else {
-        //视野 内
-        noInclude.push(d)
-      }
-      // this.createHexagon(position, d.zhName) // 地标
-      // if (d.properties.name === '北京市') {
-      //   this.camera.position.set(position.x * 3, position.y * 3, position.z * 3) // 设置相机位置到北京市
-      // }
-      // this.createHexagon(position, d.properties.name) // 地标
-    })
-    console.log('视野内', include)
-    console.log('视野外', noInclude)
-    return {
-      include: include,
-      noInclude: noInclude
-    }
-  }
   initPlane = async () => {
     console.log('Plane类--初始化方法')
     this.initRenderer()
@@ -130,15 +96,16 @@ export class EarthCenter {
     this.initLight()
     this.animate()
     this.createEarth()
-    await this.createAreaPoint()
+
     window.addEventListener('resize', this.onWindowResize, false)
-    // this.initCenter()
   }
-  // initCenter = () => {
-  //   console.log('旋转屏幕中心点')
-  //   console.log(this.scene)
-  // }
-  // 世界坐标转屏幕坐标
+
+  /**
+   * 世界坐标转屏幕坐标
+   * @param x
+   * @param y
+   * @param z
+   */
   coordinateWorldTurnScreen = (x: number, y: number, z: number) => {
     const world_vector = new Vector3(x, y, z)
     const vector = world_vector.project(this.camera)
@@ -150,7 +117,9 @@ export class EarthCenter {
     }
   }
 
-  // 创建地球 半径100
+  /**
+   * 创建地球 半径100
+   */
   createEarth = () => {
     console.log('地球模型--纹理')
     const earthGeo = new SphereGeometry(this.radius, 50, 50)
@@ -165,7 +134,14 @@ export class EarthCenter {
     })
     const earthMesh = new Mesh(earthGeo, earthMater)
     this.scene.add(earthMesh)
+    //设置相机中心点
+    const position = this.createPosition([116.3912757, 39.906217])
+    this.camera.position.set(position.x * 3, position.y * 3, position.z * 3) // 设置相机中心位置
   }
+
+  /**
+   * 绘制坐标系
+   */
   createAreaPoint = async () => {
     // 球面
     const sphereGeom = new SphereGeometry(1, 40, 20),
@@ -176,21 +152,53 @@ export class EarthCenter {
     const sphere = new Mesh(sphereGeom, sphereMat)
     this.scene.add(sphere)
 
-    // const geoJsonData: GeoJsonType = (await this.loadMapData(
-    //   '/china/json/china.json'
-    // )) as GeoJsonType
+    // 清除上次打点和文字
+    // this.scene
+
     const result: { include: Array<WorldGeoJsonType>; noInclude: Array<WorldGeoJsonType> } =
       await this.filterCoordinate()
+
     result.include.forEach((d, index) => {
       const position = this.createPosition(d.center)
-      if (index === 0) {
-        this.camera.position.set(position.x * 3, position.y * 3, position.z * 3) // 设置相机位置到北京市
-      }
+      // if (index === 0) {
+      //   this.camera.position.set(position.x * 3, position.y * 3, position.z * 3) // 设置相机中心位置
+      // }
       // if (d.zhName === '北京市') {
       // }
       this.createHexagon(position, d.zhName) // 地标
     })
   }
+
+  /**
+   * 获取视野内坐标
+   */
+  filterCoordinate = async () => {
+    const geoJsonData: Array<WorldGeoJsonType> = (await this.loadMapData(
+      '/china/json/worldCenter.json'
+    )) as Array<WorldGeoJsonType>
+    const include: Array<WorldGeoJsonType> = []
+    const noInclude: Array<WorldGeoJsonType> = []
+    geoJsonData.forEach((d) => {
+      const position = this.createPosition(d.center)
+      const tempV = position
+        .applyMatrix4(this.camera.matrixWorldInverse)
+        .applyMatrix4(this.camera.projectionMatrix)
+      if (Math.abs(tempV.x) > 1 || Math.abs(tempV.y) > 1 || Math.abs(tempV.z) > 1) {
+        //视野 外
+        include.push(d)
+      } else {
+        //视野 内
+        noInclude.push(d)
+      }
+    })
+    console.log('视野内坐标系', include)
+    console.log('视野外坐标系', noInclude)
+    return {
+      include: include,
+      noInclude: noInclude
+    }
+  }
+
   /**
    * 加载 GeoJSON 文件
    */
@@ -216,7 +224,10 @@ export class EarthCenter {
     })
   }
 
-  // 坐标转换，
+  /**
+   * 坐标转换
+   * @param lnglat
+   */
   createPosition = (lnglat: Array<number>) => {
     const spherical = new Spherical()
     spherical.radius = this.radius
@@ -230,7 +241,11 @@ export class EarthCenter {
     position.setFromSpherical(spherical)
     return position
   }
-  // 创建地标标记
+  /**
+   * 创建地标标记
+   * @param position
+   * @param name
+   */
   createHexagon = (position: any, name: string) => {
     const hexagon = new Object3D()
     const texture = new TextureLoader().load('/earth/textures/gradient.png')
@@ -270,7 +285,11 @@ export class EarthCenter {
     this.scene.add(hexagon)
   }
 
-  /* 创建字体精灵 */
+  /**
+   * 创建字体精灵
+   * @param message
+   * @param parameters
+   */
   makeTextSprite = (message: any, parameters: any) => {
     /* 字体大小 */
     const fontsize = parameters.fontsize ? parameters.fontsize : 18
@@ -339,35 +358,6 @@ export class EarthCenter {
     this.dom.examples.appendChild(this.renderer.domElement)
     // document.addEventListener('mousewheel', this.handleMousewheel, false)
   }
-  handleMousewheel = (e: any) => {
-    console.log('111111', e.wheelDelta)
-    // e.preventDefault()
-    //e.stopPropagation();
-    // if (e.wheelDelta) {
-    //   //判断浏览器IE，谷歌滑轮事件
-    //   if (e.wheelDelta > 0) {
-    //     //当滑轮向上滚动时
-    //     this.cameraFov -= this.cameraNear < this.cameraFov ? 1 : 0
-    //   }
-    //   if (e.wheelDelta < 0) {
-    //     //当滑轮向下滚动时
-    //     this.cameraFov += this.cameraFov < this.cameraFov ? 1 : 0
-    //   }
-    // } else if (e.detail) {
-    //   //Firefox滑轮事件
-    //   if (e.detail > 0) {
-    //     //当滑轮向上滚动时
-    //     this.cameraFov -= 1
-    //   }
-    //   if (e.detail < 0) {
-    //     //当滑轮向下滚动时
-    //     this.cameraFov += 1
-    //   }
-    // }
-    this.camera.fov = this.cameraFov
-    this.camera.updateProjectionMatrix()
-    this.renderer.render(this.scene, this.camera)
-  }
 
   /**
    * @description 初始化相机
@@ -414,13 +404,20 @@ export class EarthCenter {
     this.controls.enablePan = true
 
     // this.controls.position = position
-    // this.controls.addEventListener(
-    //   'change',
-    //   () => {
-    //     console.log('监听到控件发生了变化', this.controls)
-    //   },
-    //   false
-    // )
+    this.controls.addEventListener(
+      'change',
+      () => {
+        if (this.timerControls) {
+          window.clearTimeout(this.timerControls)
+          this.timerControls = null
+        }
+        this.timerControls = setTimeout(async () => {
+          await this.createAreaPoint()
+          console.log('监听到轨道控制器发生了变化', this.controls)
+        }, 1000)
+      },
+      false
+    )
   }
   /**
    * @description 初始化光
