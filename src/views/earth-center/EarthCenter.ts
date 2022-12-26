@@ -48,6 +48,17 @@ export interface GeoJsonType {
     }
   ]
 }
+export interface WorldGeoJsonType {
+  id: string
+  parentId: string
+  zhName: string
+  enName: string
+  code: number
+  leve: number
+  leveName: string
+  center: number[]
+  children: WorldGeoJsonType
+}
 
 export class EarthCenter {
   public radius: number // 地球半径
@@ -73,6 +84,42 @@ export class EarthCenter {
     this.cameraFov = 40
     this.cameraNear = 1
     this.cameraFar = 1000
+  }
+
+  /**
+   * 过滤坐标
+   */
+  filterCoordinate = async () => {
+    const geoJsonData: Array<WorldGeoJsonType> = (await this.loadMapData(
+      '/china/json/worldCenter.json'
+    )) as Array<WorldGeoJsonType>
+    console.log('世界坐标', geoJsonData)
+    const include: Array<WorldGeoJsonType> = []
+    const noInclude: Array<WorldGeoJsonType> = []
+    geoJsonData.forEach((d) => {
+      const position = this.createPosition(d.center)
+      const tempV = position
+        .applyMatrix4(this.camera.matrixWorldInverse)
+        .applyMatrix4(this.camera.projectionMatrix)
+      if (Math.abs(tempV.x) > 1 || Math.abs(tempV.y) > 1 || Math.abs(tempV.z) > 1) {
+        //视野 外
+        include.push(d)
+      } else {
+        //视野 内
+        noInclude.push(d)
+      }
+      // this.createHexagon(position, d.zhName) // 地标
+      // if (d.properties.name === '北京市') {
+      //   this.camera.position.set(position.x * 3, position.y * 3, position.z * 3) // 设置相机位置到北京市
+      // }
+      // this.createHexagon(position, d.properties.name) // 地标
+    })
+    console.log('视野内', include)
+    console.log('视野外', noInclude)
+    return {
+      include: include,
+      noInclude: noInclude
+    }
   }
   initPlane = async () => {
     console.log('Plane类--初始化方法')
@@ -129,18 +176,19 @@ export class EarthCenter {
     const sphere = new Mesh(sphereGeom, sphereMat)
     this.scene.add(sphere)
 
-    const geoJsonData: GeoJsonType = (await this.loadMapData(
-      '/china/json/china.json'
-    )) as GeoJsonType
-
-    geoJsonData.features.forEach((d) => {
-      if (d.properties.center) {
-        const position = this.createPosition(d.properties.center)
-        if (d.properties.name === '北京市') {
-          this.camera.position.set(position.x * 3, position.y * 3, position.z * 3) // 设置相机位置到北京市
-        }
-        this.createHexagon(position, d.properties.name) // 地标
+    // const geoJsonData: GeoJsonType = (await this.loadMapData(
+    //   '/china/json/china.json'
+    // )) as GeoJsonType
+    const result: { include: Array<WorldGeoJsonType>; noInclude: Array<WorldGeoJsonType> } =
+      await this.filterCoordinate()
+    result.include.forEach((d, index) => {
+      const position = this.createPosition(d.center)
+      if (index === 0) {
+        this.camera.position.set(position.x * 3, position.y * 3, position.z * 3) // 设置相机位置到北京市
       }
+      // if (d.zhName === '北京市') {
+      // }
+      this.createHexagon(position, d.zhName) // 地标
     })
   }
   /**
@@ -366,13 +414,13 @@ export class EarthCenter {
     this.controls.enablePan = true
 
     // this.controls.position = position
-    this.controls.addEventListener(
-      'change',
-      () => {
-        console.log('监听到控件发生了变化', this.controls)
-      },
-      false
-    )
+    // this.controls.addEventListener(
+    //   'change',
+    //   () => {
+    //     console.log('监听到控件发生了变化', this.controls)
+    //   },
+    //   false
+    // )
   }
   /**
    * @description 初始化光
